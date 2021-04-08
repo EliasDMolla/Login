@@ -5,24 +5,20 @@ import { AuthService } from 'src/app/services/auth.service';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-register',
+  templateUrl: './register.page.html',
+  styleUrls: ['./register.page.scss'],
 })
-export class LoginPage implements OnInit {
+export class RegisterPage implements OnInit {
   email: string;
+  legajo: string;
   password: string;
 
   constructor(private auth: AuthService,
-              public spinner: LoadingController,
               public router: Router,
-              public alert: AlertController,
-              private storage: LocalStorageService) {
-
-    if(localStorage.getItem('user')) {
-      this.router.navigateByUrl('home');
-    }
-  }
+              private storageService: LocalStorageService,
+              public spinner: LoadingController,
+              public alert: AlertController) { }
 
   ngOnInit() {
   }
@@ -31,14 +27,14 @@ export class LoginPage implements OnInit {
     const alert = await this.alert.create({
       cssClass: 'my-custom-class',
       header: 'Ups!',
-      subHeader: 'Credenciales incorrectas',
+      subHeader: 'Ha ocurrido un error, vuelva a intentarlo.',
       buttons: ['Aceptar']
     });
 
     await alert.present();
   }
 
-  async doLogin() {
+  async confirmar() {
     const loading = await this.spinner.create({
       cssClass: 'my-custom-class',
       spinner: "circles",
@@ -49,15 +45,14 @@ export class LoginPage implements OnInit {
 
     await loading.present();
 
-    this.auth.Login(this.email, this.password).then(async response => {
-      console.log(response);
-      this.storage.SaveCredentials(response.user.uid);
-      await loading.dismiss();
+    this.auth.Register(this.email, this.password).then(async response => {
+      this.storageService.SaveCredentials(response.user.uid);
 
-      this.router.navigateByUrl('home');
+      await loading.dismiss();
+      this.router.navigate['home'];
     }).catch(async error => {
       await loading.dismiss();
       this.presentAlert();
     });
-  } 
+  }
 }

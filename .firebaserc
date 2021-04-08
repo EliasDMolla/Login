@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "login-e3178": {
+      "hosting": {
+        "app": [
+          "login-e3178"
+        ]
+      }
+    }
+  }
+}

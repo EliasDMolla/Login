@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { User } from 'src/app/entities/user.entity';
 import { AuthService } from 'src/app/services/auth.service';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
+import { LoginService } from 'src/app/services/login.service';
 
 @Component({
   selector: 'app-login',
@@ -17,15 +19,11 @@ export class LoginPage implements OnInit {
               public spinner: LoadingController,
               public router: Router,
               public alert: AlertController,
-              private storage: LocalStorageService) {
-
-    if(localStorage.getItem('user')) {
-      this.router.navigateByUrl('home');
-    }
+              private storage: LocalStorageService,
+              private loginService: LoginService) {
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   async presentAlert() {
     const alert = await this.alert.create({
@@ -36,6 +34,16 @@ export class LoginPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  async refreshUserToken(id: string, token: string) {
+    let user = new User();
+    user.id = id;
+    user.token = token;
+
+    this.loginService.Put(user).subscribe(async response => {
+      console.log("userData", response);
+    });
   }
 
   async doLogin() {
@@ -49,12 +57,20 @@ export class LoginPage implements OnInit {
 
     await loading.present();
 
-    this.auth.Login(this.email, this.password).then(async response => {
-      console.log(response);
-      this.storage.SaveCredentials(response.user.uid);
-      await loading.dismiss();
+    this.auth.Login(this.email, this.password).then(async authResponse => {
 
-      this.router.navigateByUrl('home');
+      this.loginService.FindByUid(authResponse.user.uid).subscribe(async userResponse => {
+        if(userResponse[0])
+          await this.refreshUserToken(userResponse[0].id, authResponse.user.refreshToken);
+        else 
+          console.log("does not exist");
+      })
+      
+      this.storage.SaveCredentials(authResponse.user.uid);
+      await loading.dismiss();
+    
+      this.router.navigate(['home']);
+
     }).catch(async error => {
       await loading.dismiss();
       this.presentAlert();

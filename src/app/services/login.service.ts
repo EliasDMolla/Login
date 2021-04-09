@@ -6,15 +6,23 @@ import { User } from '../entities/user.entity';
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
+export class LoginService {
 
   constructor(private http: HttpClient) { }
 
   Get() {
-    return this.http.get<User>('https://6057de5ac3f49200173ad07c.mockapi.io/api/test/Users');
+    return this.http.get<User>('https://6057de5ac3f49200173ad07c.mockapi.io/api/test/users');
   }
 
-  Post(credentials: Credential): Observable<User> {
-    return this.http.post<User>('https://6057de5ac3f49200173ad07c.mockapi.io/api/test/Users', credentials);
+  FindByUid(uid: string): Observable<User> {
+    return this.http.get<User>(`https://6057de5ac3f49200173ad07c.mockapi.io/api/test/users?uid=${uid}`);
+  }
+
+  Put(user: User) {
+    return this.http.put<User>(`https://6057de5ac3f49200173ad07c.mockapi.io/api/test/users/${user.id}`, user);
+  }
+
+  Post(user: User): Observable<User> {
+    return this.http.post<User>('https://6057de5ac3f49200173ad07c.mockapi.io/api/test/users', user);
   }
 }

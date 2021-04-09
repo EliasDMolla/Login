@@ -6,20 +6,14 @@ import { AngularFirestore } from '@angular/fire/firestore';
   providedIn: 'root'
 })
 export class AuthService {
+  public currentUser: any;
 
   constructor(private afAuth: AngularFireAuth,
               private af: AngularFirestore) { 
+  }
 
-    // this.afAuth.authState.subscribe(user => {
-    //   if (user) {
-    //     this.userData = user;
-    //     localStorage.setItem('user', JSON.stringify(this.userData));
-    //     JSON.parse(localStorage.getItem('user'));
-    //   } else {
-    //     localStorage.setItem('user', null);
-    //     JSON.parse(localStorage.getItem('user'));
-    //   }
-    // })
+  public get currentUserValue() {
+    return this.currentUser ? this.currentUser.value : null;
   }
 
   async Login(email: string, password: string): Promise<any> {
@@ -32,8 +26,7 @@ export class AuthService {
 
   async Logout() {
     return this.afAuth.signOut().then(() => {
-      // localStorage.removeItem('user');
-      // this.router.navigate(['login']);
+      localStorage.removeItem('user');
     })
   }
 

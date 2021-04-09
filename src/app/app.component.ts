@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NavigationEnd, ResolveEnd, Router } from '@angular/router';
 import { FirebaseX } from "@ionic-native/firebase-x/ngx";
 import { Platform } from '@ionic/angular';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -9,31 +10,32 @@ import { Platform } from '@ionic/angular';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
- urlName: string;
 
   constructor(public firebase: FirebaseX,
               public platform: Platform,
-              private router: Router) {
+              private router: Router,
+              private auth: AuthService) {
+                
+    this.hardwareBackButton();
   }
 
-  ngOnInit(): void {
-    this.router.url;
-
-    this.router.events.subscribe((routerData) => {
-      if(routerData instanceof ResolveEnd){ 
-        this.urlName = routerData.url;
-      }   
-    })
-    
-
-    //this.urlName = this.router.getCurrentNavigation().extras.state.example;
-  }
+  ngOnInit(): void { }
 
   hardwareBackButton() {
     this.platform.backButton.subscribeWithPriority(0, () => {
-      if (this.urlName == 'home') {
-        navigator['app'].exitApp();
-      }
+      this.router.events.subscribe((routerData) => {
+        if(routerData instanceof ResolveEnd){ 
+          if (routerData.url.split('/')[1] == 'home') {
+            navigator['app'].exitApp();
+          }
+        }   
+      })
     });
+  }
+
+  logout() {
+    this.auth.Logout().then(response => {
+      this.router.navigateByUrl('login');
+    }); 
   }
 }

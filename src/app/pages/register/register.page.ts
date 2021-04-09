@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { User } from 'src/app/entities/user.entity';
 import { AuthService } from 'src/app/services/auth.service';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
+import { LoginService } from 'src/app/services/login.service';
 
 @Component({
   selector: 'app-register',
@@ -10,15 +12,14 @@ import { LocalStorageService } from 'src/app/services/local-storage.service';
   styleUrls: ['./register.page.scss'],
 })
 export class RegisterPage implements OnInit {
-  email: string;
-  legajo: string;
-  password: string;
+  user: User = new User();
 
   constructor(private auth: AuthService,
               public router: Router,
               private storageService: LocalStorageService,
               public spinner: LoadingController,
-              public alert: AlertController) { }
+              public alert: AlertController,
+              private loginService: LoginService) { }
 
   ngOnInit() {
   }
@@ -45,11 +46,20 @@ export class RegisterPage implements OnInit {
 
     await loading.present();
 
-    this.auth.Register(this.email, this.password).then(async response => {
-      this.storageService.SaveCredentials(response.user.uid);
+    this.auth.Register(this.user.email, this.user.password).then(async response => {
+      //this.storageService.SaveCredentials(response.user.uid);
+      this.user.uid = response.user.uid;
 
-      await loading.dismiss();
-      this.router.navigate['home'];
+      this.loginService.Post(this.user).subscribe(async response => {
+        console.log(response);
+        
+        await loading.dismiss();
+        this.router.navigateByUrl('login');
+      }, async error => {
+        await loading.dismiss();
+        this.presentAlert();
+      });
+      
     }).catch(async error => {
       await loading.dismiss();
       this.presentAlert();

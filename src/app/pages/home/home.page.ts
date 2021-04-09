@@ -9,7 +9,6 @@ import { FirebaseX } from "@ionic-native/firebase-x/ngx";
 export class HomePage implements OnInit {
 
   constructor() {
-    
   }
 
   ngOnInit() {

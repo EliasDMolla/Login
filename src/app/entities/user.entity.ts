@@ -1,8 +1,12 @@
 export class User {
-    id: number;
-    fullName: string;
+    id: string;
+    uid: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     docket: string;
     password: string;
+    token: string;
 }
 
 export class Credential {

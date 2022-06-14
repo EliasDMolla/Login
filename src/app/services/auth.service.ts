@@ -1,25 +1,21 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
+import { User } from '../entities/user.entity';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  public currentUserSubject: BehaviorSubject<User>;
+  public currentUser: Observable<User>;
 
-  constructor(private afAuth: AngularFireAuth,
-              private af: AngularFirestore) { 
+  constructor(private afAuth: AngularFireAuth) { 
+  }
 
-    // this.afAuth.authState.subscribe(user => {
-    //   if (user) {
-    //     this.userData = user;
-    //     localStorage.setItem('user', JSON.stringify(this.userData));
-    //     JSON.parse(localStorage.getItem('user'));
-    //   } else {
-    //     localStorage.setItem('user', null);
-    //     JSON.parse(localStorage.getItem('user'));
-    //   }
-    // })
+  public get currentUserValue() {
+    return this.currentUserSubject ? this.currentUserSubject.value : null;
   }
 
   async Login(email: string, password: string): Promise<any> {
@@ -32,12 +28,19 @@ export class AuthService {
 
   async Logout() {
     return this.afAuth.signOut().then(() => {
-      // localStorage.removeItem('user');
-      // this.router.navigate(['login']);
+      localStorage.removeItem('user');
     })
   }
 
   ChangePassword(email: string) {
     return this.afAuth.sendPasswordResetEmail(email);
+  }
+
+  SaveCredentials(user: User) {
+    if(localStorage.getItem('user')) {
+      localStorage.removeItem('user');
+    }
+
+    localStorage.setItem('user', JSON.stringify(user));
   }
 }
